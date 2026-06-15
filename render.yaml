@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: avyrix-backend
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port 10000 --app-dir backend
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: CORS_ORIGINS
+        value: https://your-vercel-app.vercel.app,https://your-user.github.io
+      - key: API_BASE_URL
+        value: https://your-render-backend-url.onrender.com
+      - key: OPENAI_API_KEY
+        value: ""

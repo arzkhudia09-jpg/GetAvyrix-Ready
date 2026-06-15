@@ -8,7 +8,7 @@
     content="Avyrix Learning Lab — Interactive security lessons. Paste code, learn about vulnerabilities, see real attacks, and master the fixes." />
   <title>Security Learning Lab Demo — Avyrix</title>
   <link rel="stylesheet" href="css/styles.css" />
-  <meta name="devsecurecoach-api-url" content="http://localhost:8000/scan" />
+  <meta name="devsecurecoach-api-url" content="" />
   <meta name="devsecurecoach-api-key" content="" />
   <link rel="icon" type="image/svg+xml"
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%2300e5a0'/><path d='M10 16l4 4 8-8' stroke='%23000' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>" />
@@ -53,9 +53,9 @@
   <main>
     <header class="page-header" aria-labelledby="demo-heading">
       <div class="container">
-        <span class="badge badge--green badge--dot" style="margin-bottom:16px;">Free Learning Lab</span>
-        <h1 class="display-md fade-up" id="demo-heading">Learn Security By Example — 30 Seconds</h1>
-        <p class="fade-up fade-up--d1" style="max-width:540px;margin-left:auto;margin-right:auto;"> Paste vulnerable code and explore an interactive security lesson. Understand what happened, why it matters, how attackers exploit it, and the right way to fix it. </p>
+        <span class="badge badge--green badge--dot" style="margin-bottom:16px;">DevSecureCoach MVP</span>
+        <h1 class="display-md fade-up" id="demo-heading">Real static analysis with beginner-friendly remediation</h1>
+        <p class="fade-up fade-up--d1" style="max-width:640px;margin-left:auto;margin-right:auto;">Paste a snippet, choose the language, and run the same secure pipeline the MVP uses for real scan results, guidance, and fix steps.</p>
       </div>
     </header>
     <!-- ═══════════════════════════════════════════════════════════
@@ -82,10 +82,21 @@
                 <span id="char-count" style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);">0
                   chars</span>
               </div>
-              <!-- Textarea -->
-              <div style="padding:20px 20px 0;">
+              <!-- Language + textarea -->
+              <div style="padding:20px 20px 0;display:flex;flex-direction:column;gap:12px;">
+                <div class="form-group">
+                  <label for="language-select" class="form-label">Programming language</label>
+                  <select id="language-select" class="form-select">
+                    <option value="python">Python</option>
+                    <option value="javascript">JavaScript</option>
+                    <option value="typescript">TypeScript</option>
+                    <option value="go">Go</option>
+                    <option value="java">Java</option>
+                    <option value="php">PHP</option>
+                    <option value="ruby">Ruby</option>
+                  </select>
+                </div>
                 <label for="code-input" class="sr-only">Paste your code here</label>
-                
                 <textarea id="code-input" class="form-textarea"
                   placeholder="// Paste your code here...&#10;&#10;// Example SQL injection:&#10;// query = &quot;SELECT * FROM users WHERE id = &quot; + userId&#10;&#10;// Example XSS:&#10;// element.innerHTML = userInput&#10;&#10;// Example secret:&#10;// api_key = &quot;sk-prod_abc123...&quot;"
                   spellcheck="false" autocorrect="off" autocapitalize="off"
@@ -154,13 +165,13 @@
           <!-- RIGHT: Results Panel -->
           <div>
             <div id="scan-results" role="region" aria-label="Scan results" aria-live="polite">
-              <!-- Populated by demo.js -->
+              <!-- Populated by js/scan-ui.js -->
             </div>
             <div
               style="margin-top:16px;padding:14px;border:1px solid var(--border);border-radius:8px;background:var(--bg-0);font-size:13px;color:var(--text-muted);">
-              <p style="margin-bottom:8px;"> 💡 <strong>Demo Mode:</strong> This is a simplified preview using pattern matching (not a full code analyzer). The real engine (launching Q2 2025) will provide full-codebase, context-aware scanning with 48+ OWASP rules. </p>
-              <p style="margin-bottom:8px;"> ✨ Want the full scanner with CI/CD integration, team dashboards, and early adopter pricing? <a href="waitlist.html" style="color:var(--accent-green);font-weight:500;">Join the waitlist.</a> </p>
-              <p style="margin:0;"> 👉 Was this demo helpful? Your feedback shapes what we build next. </p>
+              <p style="margin-bottom:8px;"> 💡 <strong>MVP status:</strong> the frontend now talks to a real FastAPI backend and Semgrep-powered analysis pipeline for live findings and remediation guidance.</p>
+              <p style="margin-bottom:8px;"> ✨ The scanner keeps all submitted snippets in a temporary file, uses timeout protection, and never executes user code. </p>
+              <p style="margin:0;"> 👉 Want the full enterprise workflow? Join the waitlist for CI/CD and team dashboards.</p>
             </div>
             <div style="margin-top:16px;display:flex;gap:12px;">
               <button onclick="sendFeedback('yes')" class="btn btn--ghost" style="flex:1;justify-content:center;">👍 Yes, very helpful</button>
@@ -214,7 +225,7 @@
   <script src="js/utils.js"></script>
   <script src="js/app.js"></script>
   <script src="js/services/api.js"></script>
-  <script src="js/demo.js"></script>
+  <script src="js/scan-ui.js"></script>
   <!-- Accessibility: visually hidden helper class -->
   <style>
     .sr-only {

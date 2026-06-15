@@ -1,0 +1,8 @@
+fastapi==0.137.0
+uvicorn==0.49.0
+gunicorn==22.0.0
+pydantic==2.13.4
+python-dotenv==1.2.2
+semgrep==1.166.0
+pytest==9.1.0
+httpx==0.28.1
