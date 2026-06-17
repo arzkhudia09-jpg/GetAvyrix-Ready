@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  const DEFAULT_BASE = (typeof window !== 'undefined' && window.__DEVSECURE_API_BASE__) || 'https://your-render-backend-url.onrender.com';
+  const DEFAULT_BASE = (typeof window !== 'undefined' && window.__DEVSECURE_API_BASE__) || 'http://127.0.0.1:8000';
 
   function getApiBase() {
     const meta = document.querySelector('meta[name="devsecurecoach-api-url"]');
@@ -34,7 +34,7 @@
   }
 
   window.DevSecureAPI = {
-    async postScan(payload, timeoutMs = 30000) {
+    async postScan(payload, timeoutMs = 120000) {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
       try {

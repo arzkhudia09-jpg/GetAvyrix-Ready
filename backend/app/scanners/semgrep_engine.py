@@ -31,7 +31,14 @@ class SemgrepEngine:
         with tempfile.TemporaryDirectory(prefix="devsecurecoach-") as tmpdir:
             file_path = Path(tmpdir) / f"snippet.{self._ext(normalized_language)}"
             file_path.write_text(code, encoding="utf-8")
-            cmd = [self.binary, "--config", "auto", "--json", str(file_path)]
+            cmd = [
+                self.binary,
+                "scan",
+                "--config",
+                "auto",
+                "--json",
+                str(file_path),
+            ]
             try:
                 completed = subprocess.run(
                     cmd,
@@ -43,10 +50,14 @@ class SemgrepEngine:
                     check=False,
                 )
             except subprocess.TimeoutExpired as exc:
-                raise TimeoutError("The scan timed out. Please try a smaller snippet.") from exc
+                raise TimeoutError(
+                    "The scan timed out. Please try a smaller snippet."
+                ) from exc
 
             if completed.returncode not in (0, 1):
-                raise RuntimeError("The scanner could not complete the request right now.")
+                raise RuntimeError(
+                    "The scanner could not complete the request right now."
+                )
 
             try:
                 data = json.loads(completed.stdout or "{}")
@@ -59,7 +70,9 @@ class SemgrepEngine:
         normalized = (language or "").strip().lower()
         if normalized not in self.SUPPORTED_LANGUAGES:
             supported = ", ".join(sorted(self.SUPPORTED_LANGUAGES))
-            raise ValueError(f"Unsupported language '{language}'. Supported languages: {supported}.")
+            raise ValueError(
+                f"Unsupported language '{language}'. Supported languages: {supported}."
+            )
         return normalized
 
     def _ext(self, language: str) -> str:

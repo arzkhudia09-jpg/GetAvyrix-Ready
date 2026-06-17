@@ -1,17 +1,40 @@
 services:
   - type: web
-    name: avyrix-backend
-    env: python
+    name: avyrix-api
+    runtime: python
     region: oregon
     plan: free
-    buildCommand: pip install -r backend/requirements.txt
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port 10000 --app-dir backend
+
+    # Build command - installs dependencies
+    buildCommand: pip install -r requirements.txt
+
+    # Start command - runs uvicorn with proper port binding
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+
+    # Root directory containing Python app
+    rootDir: backend
+
+    # Environment variables - set these in Render dashboard for security
     envVars:
       - key: ENVIRONMENT
         value: production
-      - key: CORS_ORIGINS
-        value: https://your-vercel-app.vercel.app,https://your-user.github.io
-      - key: API_BASE_URL
-        value: https://your-render-backend-url.onrender.com
-      - key: OPENAI_API_KEY
-        value: ""
+      - key: PYTHONUNBUFFERED
+        value: '1'
+      - key: PYTHONDONTWRITEBYTECODE
+        value: '1'
+
+    # Health check endpoint
+    healthCheckPath: /health
+    healthCheckStartupFailureThresholdCount: 10
+
+    # Autodeploy on git push to main
+    autoDeploy: true
+
+    # Log output
+    logRateLimitNumBurst: 50
+
+# Environment Variables to set in Render Dashboard:
+# ===================================================
+# CORS_ORIGINS=https://your-site.vercel.app,https://your-site.github.io
+# API_BASE_URL=https://[your-render-service].onrender.com
+# OPENAI_API_KEY=sk-... (optional, for AI-powered explanations)
