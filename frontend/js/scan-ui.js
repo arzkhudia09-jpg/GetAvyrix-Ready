@@ -129,6 +129,24 @@
     container.appendChild(alert);
   }
 
+  function renderDetectionError(container, message) {
+    while (container.firstChild) container.removeChild(container.firstChild);
+    const card = el('div', 'card');
+    card.style.cssText = 'padding:20px;border-color:rgba(255,0,0,0.2);background:rgba(255,0,0,0.04);';
+
+    const title = el('h3');
+    title.style.cssText = 'font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--accent-red);margin-bottom:12px;';
+    title.textContent = '❌ Unsupported Language';
+    card.appendChild(title);
+
+    const msg = el('p');
+    msg.style.cssText = 'font-size:14px;color:var(--text-secondary);margin:0;';
+    msg.textContent = message;
+    card.appendChild(msg);
+
+    container.appendChild(card);
+  }
+
   function setLoading(button, isLoading) {
     if (!button) return;
     button.disabled = isLoading;
@@ -141,6 +159,105 @@
   }
 
   let originalButtonHtml = '';
+  let lastDetection = null;
+  let detectionPending = false;
+  let isLanguageManuallySelected = false;
+
+  function renderLanguageDetectionSuccess(container, detected, confidence) {
+    while (container.firstChild) container.removeChild(container.firstChild);
+
+    const card = el('div', 'card');
+    card.style.cssText = 'padding:20px;border-color:rgba(0,229,160,0.2);background:rgba(0,229,160,0.04);';
+
+    const title = el('h3');
+    title.style.cssText = 'font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--accent-green);margin-bottom:12px;';
+    title.textContent = '✅ Language Detected';
+    card.appendChild(title);
+
+    const detectionInfo = el('div');
+    detectionInfo.style.cssText = 'display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--text-secondary);';
+
+    const detectedLine = el('div');
+    detectedLine.innerHTML = `<strong>${detected}</strong> detected with <span class="badge badge--green" style="margin-left:8px;">${confidence}% confidence</span>`;
+    detectionInfo.appendChild(detectedLine);
+
+    const readyMsg = el('div');
+    readyMsg.style.cssText = 'margin-top:8px;color:var(--accent-green);';
+    readyMsg.textContent = 'Ready to scan!';
+    detectionInfo.appendChild(readyMsg);
+
+    card.appendChild(detectionInfo);
+    container.appendChild(card);
+  }
+
+  function renderLanguageDetectionLowConfidence(container, detected, confidence) {
+    while (container.firstChild) container.removeChild(container.firstChild);
+
+    const card = el('div', 'card');
+    card.style.cssText = 'padding:20px;border-color:rgba(255,165,0,0.2);background:rgba(255,165,0,0.04);';
+
+    const title = el('h3');
+    title.style.cssText = 'font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--text-primary);margin-bottom:12px;';
+    title.textContent = '⚠️ Uncertain Detection';
+    card.appendChild(title);
+
+    const detectionInfo = el('div');
+    detectionInfo.style.cssText = 'display:flex;flex-direction:column;gap:10px;font-size:14px;color:var(--text-secondary);';
+
+    const detectedLine = el('div');
+    detectedLine.innerHTML = `Detected: <strong>${detected || 'Unknown'}</strong> (${confidence}% confidence)`;
+    detectionInfo.appendChild(detectedLine);
+
+    const warning = el('div');
+    warning.style.cssText = 'margin-top:8px;padding:10px;border-left:3px solid var(--accent-amber);background:rgba(255,165,0,0.05);font-size:13px;';
+    warning.innerHTML = '👆 Please confirm or select your programming language above.';
+    detectionInfo.appendChild(warning);
+
+    card.appendChild(detectionInfo);
+    container.appendChild(card);
+  }
+
+  function renderLanguageDetectionFailed(container) {
+    while (container.firstChild) container.removeChild(container.firstChild);
+
+    const card = el('div', 'card');
+    card.style.cssText = 'padding:20px;border-color:rgba(255,165,0,0.2);background:rgba(255,165,0,0.04);';
+
+    const title = el('h3');
+    title.style.cssText = 'font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--text-primary);margin-bottom:12px;';
+    title.textContent = '❓ Language Not Detected';
+    card.appendChild(title);
+
+    const detectionInfo = el('div');
+    detectionInfo.style.cssText = 'display:flex;flex-direction:column;gap:10px;font-size:14px;color:var(--text-secondary);';
+
+    const msg = el('div');
+    msg.innerHTML = 'Could not automatically detect the language. Please select your programming language above.';
+    detectionInfo.appendChild(msg);
+
+    card.appendChild(detectionInfo);
+    container.appendChild(card);
+  }
+
+  async function detectLanguage(code) {
+    if (!code || code.trim().length === 0) {
+      lastDetection = null;
+      return null;
+    }
+
+    detectionPending = true;
+    try {
+      const result = await window.DevSecureAPI.postDetect({ code, language: 'python', filename: null });
+      lastDetection = result;
+      return result;
+    } catch (error) {
+      console.error('[DETECTION] Error:', error);
+      lastDetection = null;
+      return null;
+    } finally {
+      detectionPending = false;
+    }
+  }
 
   function initScanner() {
     const codeInput = document.getElementById('code-input');
@@ -151,28 +268,79 @@
     if (!codeInput || !scanBtn || !results) return;
     originalButtonHtml = scanBtn.innerHTML;
 
-    if (charCount) {
-      const updateCount = () => {
-        const len = codeInput.value.length;
-        charCount.textContent = `${len.toLocaleString()} chars`;
-        charCount.style.color = len > 40000 ? 'var(--accent-red)' : 'var(--text-muted)';
-      };
-      codeInput.addEventListener('input', updateCount); updateCount();
+    // Track manual language selection
+    if (languageSelect) {
+      languageSelect.addEventListener('change', () => {
+        isLanguageManuallySelected = true;
+      });
     }
+
+    // Auto-detect language as user types
+    let detectionTimeout;
+    const onCodeChange = async () => {
+      clearTimeout(detectionTimeout);
+      const len = codeInput.value.length;
+      charCount.textContent = `${len.toLocaleString()} chars`;
+      charCount.style.color = len > 40000 ? 'var(--accent-red)' : 'var(--text-muted)';
+
+      if (len > 0 && len <= 40000) {
+        detectionTimeout = setTimeout(async () => {
+          const detection = await detectLanguage(codeInput.value);
+
+          if (detection && detection.detected_language) {
+            // High confidence: auto-select and show success
+            if (detection.confidence >= 80) {
+              if (languageSelect) {
+                languageSelect.value = detection.detected_language;
+              }
+              renderLanguageDetectionSuccess(results, detection.detected_language, detection.confidence);
+            } else {
+              // Low confidence: ask user to confirm
+              renderLanguageDetectionLowConfidence(results, detection.detected_language, detection.confidence);
+            }
+          } else {
+            // Failed to detect
+            renderLanguageDetectionFailed(results);
+          }
+        }, 800);
+      } else if (len === 0) {
+        // Clear results when code is empty
+        while (results.firstChild) results.removeChild(results.firstChild);
+        lastDetection = null;
+      }
+    };
+
+    codeInput.addEventListener('input', onCodeChange);
+    if (charCount) onCodeChange();
 
     scanBtn.addEventListener('click', async () => {
       const code = codeInput.value.trim();
       const language = languageSelect ? languageSelect.value : 'python';
+
       if (!code) {
         renderError(results, 'Please paste code before scanning.');
         return;
       }
+
       if (!language) {
-        renderError(results, 'Select a supported programming language.');
+        renderError(results, 'Please select a programming language.');
         return;
       }
+
       if (code.length > 50000) {
         renderError(results, 'This snippet is too large for the live scanner. Please shorten it.');
+        return;
+      }
+
+      // Re-detect if needed and check if supported
+      if (!lastDetection || !lastDetection.detected_language) {
+        const detection = await detectLanguage(code);
+        if (detection && !detection.supported) {
+          renderDetectionError(results, detection.message || 'Language is not supported.');
+          return;
+        }
+      } else if (!lastDetection.supported) {
+        renderDetectionError(results, lastDetection.message || 'Language is not supported.');
         return;
       }
 

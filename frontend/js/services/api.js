@@ -52,6 +52,9 @@
         clearTimeout(timer);
       }
     },
+    async postDetect(payload) {
+      return request('/detect', { method: 'POST', body: payload });
+    },
     async postExplain(payload) {
       return request('/explain', { method: 'POST', body: payload });
     },
