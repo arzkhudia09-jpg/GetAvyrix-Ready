@@ -13,6 +13,9 @@
   async function request(path, options = {}) {
     const base = getApiBase();
     const normalizedBase = String(base || '').replace(/\/scan$/, '').replace(/\/$/, '');
+    const startTime = performance.now();
+    console.log(`[API] ${options.method || 'GET'} ${path} started`);
+
     const res = await fetch(`${normalizedBase}${path}`, {
       method: options.method || 'GET',
       headers: {
@@ -23,7 +26,13 @@
       signal: options.signal,
     });
 
+    const fetchTime = performance.now() - startTime;
+    console.log(`[API] ${options.method || 'GET'} ${path} fetch completed in ${fetchTime.toFixed(0)}ms`);
+
     const data = await res.json().catch(() => ({}));
+    const totalTime = performance.now() - startTime;
+    console.log(`[API] ${options.method || 'GET'} ${path} total time ${totalTime.toFixed(0)}ms (parse: ${(totalTime - fetchTime).toFixed(0)}ms)`);
+
     if (!res.ok) {
       const err = new Error(data.message || data.detail || 'Request failed');
       err.code = res.status;

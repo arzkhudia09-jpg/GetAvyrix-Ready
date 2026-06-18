@@ -16,3 +16,10 @@ class ScanResponse(BaseModel):
     status: str
     scan_results: list[FindingResponse]
     summary: str
+
+
+class LanguageDetectionResponse(BaseModel):
+    detected_language: str | None
+    confidence: int
+    supported: bool
+    message: str | None = None

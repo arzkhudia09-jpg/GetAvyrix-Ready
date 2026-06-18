@@ -178,7 +178,11 @@
 
       setLoading(scanBtn, true);
       try {
-        const response = await window.DevSecureAPI.postScan({ code, language, filename: null }, 30000);
+        const startTime = performance.now();
+        console.log('[SCAN] Request started at', new Date().toISOString());
+        const response = await window.DevSecureAPI.postScan({ code, language, filename: null }, 60000);
+        const endTime = performance.now();
+        console.log('[SCAN] Request completed in', (endTime - startTime).toFixed(0), 'ms');
         const findings = Array.isArray(response.scan_results) ? response.scan_results : [];
         if (!findings.length) {
           renderEmpty(results);
