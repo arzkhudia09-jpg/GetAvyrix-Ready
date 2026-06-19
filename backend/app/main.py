@@ -32,7 +32,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.middleware("http")(add_security_headers)
+# app.middleware("http")(add_security_headers)
 
 app.include_router(scan_router, prefix="", tags=["scan"])
 app.include_router(explain_router, prefix="", tags=["explain"])
