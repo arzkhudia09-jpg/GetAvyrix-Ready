@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  const DEFAULT_BASE = (typeof window !== 'undefined' && window.__DEVSECURE_API_BASE__) || 'http://127.0.0.1:8000';
+  const DEFAULT_BASE = (typeof window !== 'undefined' && window.__DEVSECURE_API_BASE__) || 'https://getavyrix-ready.onrender.com';
 
   function getApiBase() {
     const meta = document.querySelector('meta[name="devsecurecoach-api-url"]');
