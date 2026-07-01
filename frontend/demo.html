@@ -53,7 +53,7 @@
   <main>
     <header class="page-header" aria-labelledby="demo-heading">
       <div class="container">
-        <span class="badge badge--green badge--dot" style="margin-bottom:16px;">DevSecureCoach MVP</span>
+        <span class="badge badge--green badge--dot" style="margin-bottom:16px;">DevSecure MVP</span>
         <h1 class="display-md fade-up" id="demo-heading">Real static analysis with beginner-friendly remediation</h1>
         <p class="fade-up fade-up--d1" style="max-width:640px;margin-left:auto;margin-right:auto;">Paste a snippet, choose the language, and run the same secure pipeline the MVP uses for real scan results, guidance, and fix steps.</p>
       </div>
@@ -65,7 +65,7 @@
       <div class="container">
         <div class="grid-2" style="gap:40px;align-items:start;">
           <!-- LEFT: Code Input Panel -->
-          <div data-reveal>
+          <div data-reveal style="align-self:start;">
             <div class="card" style="padding:0;overflow:hidden;">
               <!-- Panel header -->
               <div
@@ -123,21 +123,23 @@
                 </div>
               </div>
               <!-- Action buttons -->
-              <div
-                style="display:flex;gap:10px;padding:16px 20px;border-top:1px solid var(--border);background:var(--bg-2);">
-                <button id="scan-btn" class="btn btn--primary" style="flex:1;justify-content:center;padding:12px;"
-                  aria-label="Analyze code and learn about security patterns">
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                    <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.5" />
-                    <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                    <path d="M7 5v2M7 7h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                  </svg> Analyze & Learn </button>
-                <button id="clear-btn" class="btn btn--ghost" style="padding:12px 16px;" aria-label="Clear code input">
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                    <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                  </svg> Clear </button>
+              <div style="padding:16px 20px;border-top:1px solid var(--border);background:var(--bg-2);">
+                <div style="display:flex;gap:10px;">
+                  <button id="scan-btn" class="btn btn--primary" style="flex:1;justify-content:center;padding:12px;"
+                    aria-label="Analyze code and learn about security patterns">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                      <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.5" />
+                      <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                      <path d="M7 5v2M7 7h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                    </svg> Analyze & Learn </button>
+                  <button id="clear-btn" class="btn btn--ghost" style="padding:12px 16px;" aria-label="Clear code input">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                      <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                    </svg> Clear </button>
+                </div>
               </div>
             </div>
+            <div id="mvp-status-host" style="margin-top:16px;"></div>
             <!-- Detection rules info -->
             <div
               style="margin-top:16px;padding:16px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);">
@@ -163,11 +165,12 @@
             </div>
           </div>
           <!-- RIGHT: Results Panel -->
-          <div>
-            <div id="scan-results" role="region" aria-label="Scan results" aria-live="polite">
+          <div style="align-self:start;">
+            <div id="scanner-summary-row" class="scanner-summary-row" aria-live="polite"></div>
+            <div id="scan-results" role="region" aria-label="Scan results" aria-live="polite" style="margin-top:12px;">
               <!-- Populated by js/scan-ui.js -->
             </div>
-            <div
+            <div id="mvp-status-block"
               style="margin-top:16px;padding:14px;border:1px solid var(--border);border-radius:8px;background:var(--bg-0);font-size:13px;color:var(--text-muted);">
               <p style="margin-bottom:8px;"> 💡 <strong>MVP status:</strong> the frontend now talks to a real FastAPI backend and Semgrep-powered analysis pipeline for live findings and remediation guidance.</p>
               <p style="margin-bottom:8px;"> ✨ The scanner keeps all submitted snippets in a temporary file, uses timeout protection, and never executes user code. </p>

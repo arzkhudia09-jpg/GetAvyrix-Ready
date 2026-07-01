@@ -43,6 +43,27 @@
   }
 
   window.DevSecureAPI = {
+    async getHealth(timeoutMs = 8000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        return await request('/health', { method: 'GET', signal: controller.signal });
+      } catch (error) {
+        if (error && (error.name === 'AbortError' || error.code === 408)) {
+          const timeoutError = new Error('Health check timed out');
+          timeoutError.code = 504;
+          throw timeoutError;
+        }
+        if (error && error.name === 'TypeError') {
+          const networkError = new Error('Backend connection failed');
+          networkError.code = 503;
+          throw networkError;
+        }
+        throw error;
+      } finally {
+        clearTimeout(timer);
+      }
+    },
     async postScan(payload, timeoutMs = 120000) {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
